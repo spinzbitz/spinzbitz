@@ -1,0 +1,306 @@
+class Product:
+    def __init__(self, name, price, quantity):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+
+class Marketplace:
+    def __init__(self):
+        self.products = []
+
+    def add_product(self, product):
+        self.products.append(product)
+
+    def remove_product(self, product):
+        self.products.remove(product)
+
+    def search_product(self, keyword):
+        matching_products = []
+        for product in self.products:
+            if keyword in product.name:
+                matching_products.append(product)
+        return matching_products
+
+class ShoppingCart:
+    def __init__(self):
+        self.items = []
+
+    def add_item(self, product, quantity):
+        for item in self.items:
+            if item["product"] == product:
+                item["quantity"] += quantity
+                return
+        self.items.append({"product": product, "quantity": quantity})
+
+    def remove_item(self, product):
+        for item in self.items:
+            if item["product"] == product:
+                self.items.remove(item)
+                return
+
+    def update_quantity(self, product, quantity):
+        for item in self.items:
+            if item["product"] == product:
+                item["quantity"] = quantity
+                return
+
+    def calculate_total(self):
+        total = 0
+        for item in self.items:
+            total += item["product"].price * item["quantity"]
+        return total
+
+# Example usage
+marketplace = Marketplace()
+shopping_cart = ShoppingCart()
+
+# User posts an item to the marketplace
+user_posted_product = Product("New Product", 9.99, 20)
+marketplace.add_product(user_posted_product)
+
+# User adds the item to their shopping cart
+shopping_cart.add_item(user_posted_product, 3)
+
+# User updates the quantity of the item in the shopping cart
+shopping_cart.update_quantity(user_posted_product, 5)
+
+# User removes the item from the shopping cart
+shopping_cart.remove_item(user_posted_product)
+
+# Searching for products in the marketplace
+results = marketplace.search_product("New")
+for product in results:
+    print(f"Product: {product.name} | Price: {product.price} | Quantity: {product.quantity}")
+
+# Calculating the total price in the shopping cart
+total_price = shopping_cart.calculate_total()
+print(f"Total Price: {total_price}") 
+import json
+from datetime import datetime, timedelta
+
+class User:
+    def __init__(self, username, password, email):
+        self.username = username
+        self.password = password
+        self.email = email
+        self.is_subscribed = False
+        self.subscription_end_date = None
+
+class MembershipSystem:
+    def __init__(self):
+        self.users = []
+        self.load_users()
+
+    def register(self, username, password, email):
+        if self.get_user_by_username(username):
+            raise Exception("Username already exists.")
+
+        user = User(username, password, email)
+        self.users.append(user)
+        self.save_users()
+
+    def get_user_by_username(self, username):
+        for user in self.users:
+            if user.username == username:
+                return user
+        return None
+
+    def load_users(self):
+        try:
+            with open("users.json", "r") as file:
+                data = json.load(file)
+                self.users = [
+                    User(user["username"], user["password"], user["email"])
+                    for user in data
+                ]
+        except FileNotFoundError:
+            self.users = []
+
+    def save_users(self):
+        data = [
+            {"username": user.username, "password": user.password, "email": user.email}
+            for user in self.users
+        ]
+        with open("users.json", "w") as file:
+            json.dump(data, file)
+
+class SubscriptionPlan:
+    def __init__(self, name, price):
+        self.name = name
+        self.price = price
+
+class PaymentGateway:
+    def process_payment(self, amount):
+        # Integration with the payment gateway code goes here
+        # Process the payment for the given amount
+        # Handle success or failure of the payment
+
+class MembershipController:
+    def __init__(self, membership_system, payment_gateway):
+        self.membership_system = membership_system
+        self.payment_gateway = payment_gateway
+
+    def subscribe_user(self, username, plan):
+        user = self.membership_system.get_user_by_username(username)
+        if not user:
+            raise Exception("User not found.")
+
+        # Check if the user is already subscribed
+        if user.is_subscribed:
+            raise Exception("User is already subscribed.")
+
+        # Process the payment for the subscription plan
+        self.payment_gateway.process_payment(plan.price)
+
+        # Update user's subscription status and end date
+        user.is_subscribed = True
+        user.subscription_end_date = datetime.now() + timedelta(days=30)
+
+        # Save the updated user data
+        self.membership_system.save_users()
+
+# Example usage
+membership_system = MembershipSystem()
+payment_gateway = PaymentGateway()
+membership_controller = MembershipController(membership_system, payment_gateway)
+
+# User registration
+try:
+    membership_system.register("user1", "password1", "user1@example.com")
+    membership_system.register("user2", "password2", "user2@example.com")
+except Exception as e:
+    print(f"Registration Error: {str(e)}")
+
+# User subscribes to a membership plan
+subscription_plan = SubscriptionPlan("Monthly", 10.99)
+try:
+    membership_controller.subscribe_user("user1", subscription_plan)
+except Exception as e:
+    print(f"Subscription Error: {str(e)}")
+
+# Checking the user's subscription status
+user1 = membership_system.get_user_by_username("user1")
+if user1:
+    if user1.is_subscribed:
+        print(f"User {user1.username} is subscribed until {user1.subscription_end_date}")
+    else:
+        print(f"User {user1.username} is not subscribed")
+
+# Save user data
+membership_system.save_users()
+
+class User:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+class Authentication:
+    def __init__(self):
+        self.users = []
+
+    def register(self, username, password):
+        user = User(username, password)
+        self.users.append(user)
+
+    def login(self, username, password):
+        for user in self.users:
+            if user.username == username and user.password == password:
+                return True
+        return False
+
+# Example usage
+authentication = Authentication()
+
+# Registering users
+authentication.register("user1", "password1")
+authentication.register("user2", "password2")
+
+# Authenticating users
+print(authentication.login("user1", "password1"))  # True
+print(authentication.login("user3", "password3"))  # False
+
+class Product:
+    def __init__(self, name, price):
+        self.name = name
+        self.price = price
+
+class ShoppingCart:
+    def __init__(self):
+        self.items = []
+
+    def add_item(self, product, quantity):
+        for item in self.items:
+            if item["product"] == product:
+                item["quantity"] += quantity
+                return
+        self.items.append({"product": product, "quantity": quantity})
+
+    def remove_item(self, product):
+        for item in self.items:
+            if item["product"] == product:
+                self.items.remove(item)
+                return
+
+    def update_quantity(self, product, quantity):
+        for item in self.items:
+            if item["product"] == product:
+                item["quantity"] = quantity
+                return
+
+    def calculate_total(self):
+        total = 0
+        for item in self.items:
+            total += item["product"].price * item["quantity"]
+        return total
+
+    def apply_discount(self, discount_percentage):
+        total = self.calculate_total()
+        discount_amount = total * (discount_percentage / 100)
+        total -= discount_amount
+        return total
+
+    def process_payment(self, payment_method):
+        total = self.calculate_total()
+        # Integration with payment system code goes here
+        # Process payment using the specified payment method
+        # Handle success or failure of the payment
+
+    def save_cart(self):
+        # Code for persisting cart data between sessions goes here
+        # Save the cart data to a file or database
+
+    def load_cart(self):
+        # Code for loading cart data from previous sessions goes here
+        # Load the cart data from a file or database
+
+# Example usage
+shopping_cart = ShoppingCart()
+
+# Adding items to the cart
+product1 = Product("Apple", 1.99)
+product2 = Product("Banana", 0.99)
+shopping_cart.add_item(product1, 3)
+shopping_cart.add_item(product2, 2)
+
+# Updating item quantity
+shopping_cart.update_quantity(product1, 5)
+
+# Removing an item from the cart
+shopping_cart.remove_item(product2)
+
+# Calculating the total price
+total_price = shopping_cart.calculate_total()
+print(f"Total Price: {total_price}")
+
+# Applying a discount
+discounted_price = shopping_cart.apply_discount(10)
+print(f"Discounted Price: {discounted_price}")
+
+# Processing payment
+shopping_cart.process_payment("Credit Card")
+
+# Saving the cart
+shopping_cart.save_cart()
+
+# Loading a saved cart
+shopping_cart.load_cart()
